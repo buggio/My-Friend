@@ -1,7 +1,12 @@
 package snr.artkhonghan.somphet.myfriend;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -16,7 +21,9 @@ public class SignUpActivity extends AppCompatActivity {
     private RadioButton maleRadioButton, femaleRadioButton;
     private ImageView imageView;
 
-    private String nameString, userString, passwordString, rePasswordString, sexString, imageString;
+    private String nameString, userString, passwordString,
+            rePasswordString, sexString, imageString,
+            imagePathString, imageNameString;
 
 
     @Override
@@ -34,7 +41,63 @@ public class SignUpActivity extends AppCompatActivity {
         femaleRadioButton = (RadioButton) findViewById(R.id.radioButton2);
         imageView = (ImageView) findViewById(R.id.imageView);
 
+        // Image Controller
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, "โปรดเลือกรูปภาพ"), 1);
+
+
+            }   // On Click
+        });
+
     }   // Main Method
+
+    @Override
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
+                                    Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d("MyFriendV2",  "Result ==> " + resultCode+"");
+
+        if ((requestCode == 1)&&(resultCode == RESULT_OK)) {
+            // Result Complete
+            Log.d("MyFriendV1", "Result ==> OK");
+        }   //if
+
+        // Find Path
+        Uri uri = data.getData();
+        imagePathString = myFindPathImage(uri);
+
+        Log.d("MyFriendV1", "imagePathString ==>" + imagePathString);
+
+
+
+    }   // onActivityResult
+
+    private String myFindPathImage(Uri uri) {
+
+        String strResult = null;
+        String[] strings = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, strings,
+                null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int intIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            strResult = cursor.getString(intIndex);
+
+        } else {
+            strResult = uri.getPath();
+
+        }
+
+
+
+        return strResult;
+    }
 
     public void clickSignUpSign(View view) {
 
@@ -55,8 +118,11 @@ public class SignUpActivity extends AppCompatActivity {
             MyAlert myAlert = new MyAlert(this, R.drawable.nobita48, "Password ผิด", "กรุณาพิมพ์ Password ให้เหมือนกัน");
             myAlert.myDialog();
 
+        } else if (!(maleRadioButton.isChecked() || femaleRadioButton.isChecked())) {
+            MyAlert myAlert = new MyAlert(this, R.drawable.bird48, "ยังไม่เลือกเพศ", "กรุณาเลือกเพศด้วยคะ");
+            myAlert.myDialog();
+            // Non Choose Sex
         }
-        // Non Check Sex
 
 
     }   // clickSign
