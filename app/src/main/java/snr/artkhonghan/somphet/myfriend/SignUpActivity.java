@@ -2,6 +2,8 @@ package snr.artkhonghan.somphet.myfriend;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -73,6 +75,18 @@ public class SignUpActivity extends AppCompatActivity {
         imagePathString = myFindPathImage(uri);
 
         Log.d("MyFriendV1", "imagePathString ==>" + imagePathString);
+
+        // Setup Image to ImageView
+        try {
+
+            Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver()
+                    .openInputStream(uri));
+            imageView.setImageBitmap(bitmap);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
 
 
