@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +15,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import org.jibble.simpleftp.SimpleFTP;
+
+import java.io.File;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -26,6 +31,8 @@ public class SignUpActivity extends AppCompatActivity {
     private String nameString, userString, passwordString,
             rePasswordString, sexString, imageString,
             imagePathString, imageNameString;
+
+    private boolean statusABoolean = true;
 
 
     @Override
@@ -63,32 +70,30 @@ public class SignUpActivity extends AppCompatActivity {
                                     Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("MyFriendV2",  "Result ==> " + resultCode+"");
-
-        if ((requestCode == 1)&&(resultCode == RESULT_OK)) {
+        if ((requestCode == 1) && (resultCode == RESULT_OK)) {
             // Result Complete
             Log.d("MyFriendV1", "Result ==> OK");
-        }   //if
 
-        // Find Path
-        Uri uri = data.getData();
-        imagePathString = myFindPathImage(uri);
+            //Find Path of Image
+            Uri uri = data.getData();
+            imagePathString = myFindPathImage(uri);
+            Log.d("MyFriendV1", "imagePathString ==> " + imagePathString);
 
-        Log.d("MyFriendV1", "imagePathString ==>" + imagePathString);
+            //Setup Image to ImageView
+            try {
 
-        // Setup Image to ImageView
-        try {
+                Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver()
+                        .openInputStream(uri));
+                imageView.setImageBitmap(bitmap);
 
-            Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver()
-                    .openInputStream(uri));
-            imageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }   // try
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+            statusABoolean = false;
 
 
+        }   // if
 
     }   // onActivityResult
 
@@ -136,10 +141,45 @@ public class SignUpActivity extends AppCompatActivity {
             MyAlert myAlert = new MyAlert(this, R.drawable.bird48, "ยังไม่เลือกเพศ", "กรุณาเลือกเพศด้วยคะ");
             myAlert.myDialog();
             // Non Choose Sex
+        } else if (statusABoolean) {
+            MyAlert myAlert = new MyAlert(this, R.drawable.kon48, "ยังไม่เลือกรูป", "กรุณาเลือกรูปด้วยคะ");
+            myAlert.myDialog();
+
+        } else {
+            // Upload Image and Data to Server
+            upLoadImageToServer();
+
         }
 
 
-    }   // clickSign
+    }   // clickSignUpSign
+
+    private void upLoadImageToServer() {
+        // New Policy
+        StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy
+                .Builder().permitAll().build();
+        StrictMode.setThreadPolicy(threadPolicy);
+
+        try {
+
+            SimpleFTP simpleFTP = new SimpleFTP();
+            simpleFTP.connect("ftp.swiftcodingthai.com", 21,
+                    "18Sep@swiftcodingthai.com", "Abc12345");
+            simpleFTP.bin();
+            simpleFTP.cwd("Image");
+            simpleFTP.stor(new File(imagePathString));
+            simpleFTP.disconnect();
+
+            Log.d("MyFriendV1", "Upload Finish");
+
+
+        } catch (Exception e) {
+//            e.printStackTrace();
+
+            Log.d("MyFriendV1", "e ==> " + e.toString());
+        }
+
+    }   // upLoadImageToServer
 
 
 }   // Main Class
