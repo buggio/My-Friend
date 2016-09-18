@@ -62,6 +62,24 @@ public class SignUpActivity extends AppCompatActivity {
             }   // On Click
         });
 
+        // Radio Controller
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+
+                switch (i) {
+                    case R.id.radioButton:
+                        sexString = "Male";
+                        break;
+                    case R.id.radioButton2:
+                        sexString = "Female";
+                        break;
+                }   //switch
+
+            }   // onCheckedChanged
+        });
+
     }   // Main Method
 
     @Override
@@ -149,10 +167,21 @@ public class SignUpActivity extends AppCompatActivity {
             // Upload Image and Data to Server
             upLoadImageToServer();
 
+            insertDataToServer();
+
         }
 
 
     }   // clickSignUpSign
+
+    private void insertDataToServer() {
+
+        imageNameString = imagePathString.substring(imagePathString.lastIndexOf("/"));
+        imageNameString = "http://swiftcodingthai.com/18Sep/Image" + imageNameString;
+
+        Log.d("MyFriendV1", "imageNameString ==> " + imageNameString);
+
+    } // insertDataToServer
 
     private void upLoadImageToServer() {
         // New Policy
